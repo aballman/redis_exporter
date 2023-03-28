@@ -56,6 +56,7 @@ func main() {
 	var (
 		redisAddr            = flag.String("redis.addr", getEnv("REDIS_ADDR", "redis://localhost:6379"), "Address of the Redis instance to scrape")
 		redisUser            = flag.String("redis.user", getEnv("REDIS_USER", ""), "User name to use for authentication (Redis ACL for Redis 6.0 and newer)")
+		redisUserFile        = flag.String("redis.user-file", getEnv("REDIS_USER_FILE", ""), "User file of the Redis instance to scrape")
 		redisPwd             = flag.String("redis.password", getEnv("REDIS_PASSWORD", ""), "Password of the Redis instance to scrape")
 		redisPwdFile         = flag.String("redis.password-file", getEnv("REDIS_PASSWORD_FILE", ""), "Password file of the Redis instance to scrape")
 		namespace            = flag.String("namespace", getEnv("REDIS_EXPORTER_NAMESPACE", "redis"), "Namespace for metrics")
@@ -134,6 +135,14 @@ func main() {
 		}
 	}
 
+	userMap := make(map[string]string)
+	if *redisUser == "" && *redisUserFile != "" {
+		userMap, err = exporter.LoadUserFile(*redisUserFile)
+		if err != nil {
+			log.Fatalf("Error loading redis usernames from file %s, err: %s", *redisPwdFile, err)
+		}
+	}
+
 	var ls map[string][]byte
 	if *scriptPath != "" {
 		scripts := strings.Split(*scriptPath, ",")
@@ -154,6 +163,7 @@ func main() {
 		*redisAddr,
 		exporter.Options{
 			User:                  *redisUser,
+			UserMap:			   userMap,
 			Password:              *redisPwd,
 			PasswordMap:           passwordMap,
 			Namespace:             *namespace,

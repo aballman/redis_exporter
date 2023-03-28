@@ -1,0 +1,3 @@
+{
+  "redis://pwd-redis6:6390": "exporter"
+}

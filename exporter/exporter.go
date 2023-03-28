@@ -47,6 +47,7 @@ type Exporter struct {
 
 type Options struct {
 	User                  string
+	UserMap               map[string]string
 	Password              string
 	Namespace             string
 	PasswordMap           map[string]string

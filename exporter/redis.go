@@ -23,16 +23,18 @@ func (e *Exporter) configureOptions(uri string) ([]redis.DialOption, error) {
 		redis.DialTLSConfig(tlsConfig),
 	}
 
-	if e.options.User != "" {
-		options = append(options, redis.DialUsername(e.options.User))
-	}
-
-	if e.options.Password != "" {
-		options = append(options, redis.DialPassword(e.options.Password))
-	}
-
+	if e.options.UserMap[uri] != "" {
+		options = append(options, redis.DialUsername(e.options.UserMap[uri]))
+		log.Debugf("Found user in user map for %s : %s", uri, e.options.UserMap[uri])
+	} else if e.options.User != "" {
+		options = append(options, redis.DialPassword(e.options.User))
+	} 
+	
 	if e.options.PasswordMap[uri] != "" {
 		options = append(options, redis.DialPassword(e.options.PasswordMap[uri]))
+		log.Debugf("Found password for %s in passwords map %s", uri, e.options.PasswordMap[uri])
+	} else if e.options.Password != "" {
+		options = append(options, redis.DialPassword(e.options.Password))
 	}
 
 	return options, nil
